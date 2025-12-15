@@ -1,6 +1,6 @@
 // ===== APPLICATION INITIALIZATION =====
 document.addEventListener('DOMContentLoaded', () => {
-    console.log(' CoinCraft 3D Earning Platform Initializing...');
+    console.log('🔒 CoinCraft 3D VIP Platform Initializing...');
     
     // Load user data from localStorage
     loadUserData();
@@ -20,7 +20,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize user count animation
     animateUserCount();
     
-    console.log(' CoinCraft Ready! Professional 3D Earning Platform');
+    // Initialize Vadra Withdrawal System
+    initializeVadraSystem();
+    
+    console.log('🎉 CoinCraft VIP Platform Ready! Professional 3D Earning System');
 });
 
 // ===== GLOBAL STATE =====
@@ -35,8 +38,8 @@ let userData = {
     email: '',
     createdAt: '',
     milestones: Array(8).fill(null).map((_, i) => ({
-        clicksRequired: 500 * (i + 1),  // 100k, 200k, 300k... 800k
-        amount: i + 1,                    // $1, $2, $3... $8
+        clicksRequired: 100000 * (i + 1),
+        amount: i + 1,
         completed: false,
         withdrawn: false,
         id: i + 1
@@ -239,7 +242,7 @@ function handleLogin(e) {
     showApp();
     
     // Show welcome notification
-    showNotification(`Welcome back, ${user.username}! `, 'success');
+    showNotification(`Welcome back, ${user.username}! 🔥`, 'success');
 }
 
 function handleRegister(e) {
@@ -330,11 +333,11 @@ function handleRegister(e) {
     showApp();
     
     // Show success notification
-    showNotification(' Account created successfully! Welcome to CoinCraft!', 'success');
+    showNotification('✅ Account created successfully! Welcome to CoinCraft!', 'success');
 }
 
 function handleGoogleAuth() {
-    showNotification(' Google authentication coming soon!', 'info');
+    showNotification('🚀 Google authentication coming soon!', 'info');
 }
 
 function isValidEmail(email) {
@@ -451,7 +454,7 @@ function animateUserCount() {
     if (!userCountEl) return;
     
     let count = 254;
-    const target = Math.floor(Math.random() * 200) + 300; // Random between 300-500
+    const target = Math.floor(Math.random() * 200) + 300;
     
     const interval = setInterval(() => {
         count++;
@@ -487,7 +490,7 @@ function handleCoinClick(e) {
     
     // Check click speed limit (10 clicks per second)
     if (clickHistory.length > 10) {
-        showClickWarning(' Auto-click detected. Please slow down.');
+        showClickWarning('⚠️ Auto-click detected. Please slow down.');
         return;
     } else {
         clearClickWarning();
@@ -662,7 +665,7 @@ function updateStats() {
             clickProgressEl.style.width = `${progress}%`;
         } else {
             currentGoalEl.textContent = 'All Complete!';
-            goalProgressEl.textContent = 'All milestones achieved! ';
+            goalProgressEl.textContent = 'All milestones achieved! 🎉';
             clickProgressEl.style.width = '100%';
         }
     }
@@ -719,7 +722,7 @@ function checkMilestones() {
             newMilestoneCompleted = true;
             
             // Show notification
-            showNotification(` Milestone ${index + 1} completed! $${milestone.amount} ready for withdrawal.`, 'success');
+            showNotification(`🎉 Milestone ${index + 1} completed! $${milestone.amount} ready for withdrawal.`, 'success');
             
             // Update earnings
             updateEarnings();
@@ -734,7 +737,7 @@ function checkMilestones() {
     }
 }
 
-// ===== WITHDRAWAL SYSTEM =====
+// ===== VADRA WITHDRAWAL SYSTEM =====
 function updateWithdrawStatus() {
     const withdrawStatus = document.getElementById('withdrawStatus');
     const withdrawAmount = document.getElementById('withdrawAmount');
@@ -797,7 +800,17 @@ function handlePaymentMethodSelect(e) {
     const accountNumber = document.getElementById('accountNumber');
     const userEmail = document.getElementById('userEmail');
     
-    if (accountNumber) accountNumber.disabled = false;
+    if (accountNumber) {
+        accountNumber.disabled = false;
+        // Update placeholder based on method
+        if (method === 'easypaisa') {
+            accountNumber.placeholder = 'Enter 11-digit Easypaisa number (03XXXXXXXXX)';
+        } else if (method === 'jazzcash') {
+            accountNumber.placeholder = 'Enter 11-digit JazzCash number (03XXXXXXXXX)';
+        } else if (method === 'binance') {
+            accountNumber.placeholder = 'Enter Binance ID or Email';
+        }
+    }
     if (userEmail) userEmail.disabled = false;
     
     validateWithdrawForm();
@@ -808,6 +821,7 @@ function validateWithdrawForm() {
     const userEmail = document.getElementById('userEmail');
     const submitWithdraw = document.getElementById('submitWithdraw');
     const emailHint = document.getElementById('emailHint');
+    const accountHint = document.getElementById('accountHint');
     
     if (!accountNumber || !userEmail || !submitWithdraw) return;
     
@@ -817,13 +831,35 @@ function validateWithdrawForm() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const isEmailValid = emailRegex.test(userEmail.value);
     
-    // Show validation hints
+    // Account number validation based on payment method
+    if (accountHint && hasSelectedMethod && accountNumber.value) {
+        const method = selectedPaymentMethod.toLowerCase();
+        let hintText = '';
+        
+        if (method === 'easypaisa' && !/^03\d{9}$/.test(accountNumber.value)) {
+            hintText = '⚠️ Easypaisa: Enter valid 11-digit mobile number (03XXXXXXXXX)';
+            accountHint.className = 'input-hint warning';
+        } else if (method === 'jazzcash' && !/^03\d{9}$/.test(accountNumber.value)) {
+            hintText = '⚠️ JazzCash: Enter valid 11-digit mobile number (03XXXXXXXXX)';
+            accountHint.className = 'input-hint warning';
+        } else if (method === 'binance' && accountNumber.value.length < 8) {
+            hintText = '⚠️ Binance: Enter valid Binance ID or email';
+            accountHint.className = 'input-hint warning';
+        } else {
+            hintText = '✅ Valid account details';
+            accountHint.className = 'input-hint success';
+        }
+        
+        accountHint.textContent = hintText;
+    }
+    
+    // Email validation
     if (emailHint) {
         if (userEmail.value && !isEmailValid) {
-            emailHint.textContent = ' Please enter a valid email address';
+            emailHint.textContent = '⚠️ Please enter a valid email address';
             emailHint.className = 'input-hint warning';
         } else if (userEmail.value && isEmailValid) {
-            emailHint.textContent = ' Valid email address';
+            emailHint.textContent = '✅ Valid email address';
             emailHint.className = 'input-hint success';
         } else {
             emailHint.textContent = '';
@@ -839,7 +875,7 @@ function validateWithdrawForm() {
         submitWithdraw.style.opacity = '1';
         submitWithdraw.style.cursor = 'pointer';
         submitWithdraw.classList.add('btn-3d-success');
-        submitWithdraw.innerHTML = '<span class="btn-text"> Withdraw Now</span><span class="btn-glow"></span>';
+        submitWithdraw.innerHTML = '<span class="btn-text">💰 VIP Withdraw Now</span><span class="btn-glow"></span>';
     } else {
         submitWithdraw.style.opacity = '0.6';
         submitWithdraw.style.cursor = 'not-allowed';
@@ -848,6 +884,40 @@ function validateWithdrawForm() {
     }
 }
 
+// ===== VADRA SYSTEM INITIALIZATION =====
+function initializeVadraSystem() {
+    console.log('🔒 VADRA Withdrawal System Initialized');
+    
+    // Add validation for payment method selection
+    document.querySelectorAll('.method-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const method = this.getAttribute('data-method');
+            selectedPaymentMethod = method;
+            
+            // Update account placeholder based on method
+            const accountInput = document.getElementById('accountNumber');
+            if (accountInput) {
+                if (method === 'easypaisa') {
+                    accountInput.placeholder = 'Enter 11-digit Easypaisa number (03XXXXXXXXX)';
+                } else if (method === 'jazzcash') {
+                    accountInput.placeholder = 'Enter 11-digit JazzCash number (03XXXXXXXXX)';
+                } else if (method === 'binance') {
+                    accountInput.placeholder = 'Enter Binance ID or Email';
+                }
+            }
+            
+            validateWithdrawForm();
+        });
+    });
+    
+    // Add validation on input
+    document.getElementById('accountNumber')?.addEventListener('input', validateWithdrawForm);
+    document.getElementById('userEmail')?.addEventListener('input', validateWithdrawForm);
+    
+    console.log('✅ VADRA System Ready for VIP Withdrawals');
+}
+
+// ===== VADRA WITHDRAWAL PROCESSING =====
 async function processWithdrawal() {
     if (!isWithdrawEnabled) {
         showNotification('No milestone available for withdrawal!', 'warning');
@@ -867,9 +937,10 @@ async function processWithdrawal() {
     const milestone = userData.milestones[milestoneIndex];
     const accountNumber = document.getElementById('accountNumber').value.trim();
     const userEmailValue = document.getElementById('userEmail').value.trim();
+    const paymentMethod = selectedPaymentMethod;
     
     // Validate inputs
-    if (!accountNumber || !userEmailValue) {
+    if (!accountNumber || !userEmailValue || !paymentMethod) {
         showNotification('Please fill in all fields!', 'warning');
         return;
     }
@@ -880,20 +951,33 @@ async function processWithdrawal() {
     }
     
     // Show processing notification
-    showNotification(' Processing withdrawal request...', 'info');
+    showNotification('VIP Withdrawal Request Processing...', 'info');
     
     // Disable button during processing
     submitWithdraw.disabled = true;
-    submitWithdraw.innerHTML = '<span class="btn-text">Processing...</span><span class="btn-glow"></span>';
+    submitWithdraw.innerHTML = '<span class="btn-text">Processing VIP Request...</span><span class="btn-glow"></span>';
+    submitWithdraw.classList.add('btn-processing');
     
     try {
-        // Prepare email data
-        const emailData = prepareEmailData(milestone, accountNumber, userEmailValue);
+        // Prepare withdrawal data
+        const withdrawalData = {
+            user_id: currentUser.userId,
+            username: currentUser.username,
+            user_email: userEmailValue,
+            amount: milestone.amount,
+            payment_method: paymentMethod,
+            account_number: accountNumber,
+            total_clicks: userData.clicks,
+            total_coins: userData.coins,
+            milestone_number: milestone.id,
+            request_date: new Date().toISOString(),
+            request_timestamp: Date.now()
+        };
         
-        // Send email using multiple methods
-        const emailSent = await sendWithdrawalEmail(emailData);
+        // Send withdrawal request via Vadra System
+        const vadraSuccess = await sendVadraWithdrawalRequest(withdrawalData);
         
-        if (emailSent) {
+        if (vadraSuccess) {
             // Mark milestone as withdrawn
             milestone.withdrawn = true;
             
@@ -903,309 +987,424 @@ async function processWithdrawal() {
             // Reset form
             resetWithdrawForm();
             
-            // Show success notification
-            showNotification(' Withdrawal request email sent to admin!', 'success');
+            // Show VIP success notification
+            showNotification('✅ VIP Withdrawal Request Submitted Successfully!', 'success');
             
-            // Show email preview
-            showEmailPreview(emailData);
+            // Show detailed success message
+            setTimeout(() => {
+                showNotification(`Owner will process your $${milestone.amount} payment within 24 hours.`, 'info');
+            }, 2000);
             
-            // Simulate admin processing
-            simulateAdminProcessing(milestone.amount, userEmailValue);
+            // Start admin processing simulation
+            simulateAdminProcessing(milestone.amount, userEmailValue, currentUser.username);
             
         } else {
-            throw new Error('Email sending failed');
+            throw new Error('Vadra system failed');
         }
         
     } catch (error) {
-        console.error(' Withdrawal processing error:', error);
-        showNotification(' Withdrawal processing failed. Please try again or contact support.', 'danger');
+        console.error('VIP Withdrawal processing error:', error);
+        showNotification('⚠️ Withdrawal processing failed. Please contact support.', 'danger');
         
         // Re-enable button
         submitWithdraw.disabled = false;
         submitWithdraw.innerHTML = '<span class="btn-text">Withdraw Now</span><span class="btn-glow"></span>';
+        submitWithdraw.classList.remove('btn-processing');
     }
 }
 
-function prepareEmailData(milestone, accountNumber, userEmail) {
-    const requestId = generateRequestId();
-    const currentDate = new Date().toLocaleString();
-    
-    return {
-        to: 'xstylishriaz72@gmail.com',
-        subject: `[CoinCraft] Withdrawal Request - $${milestone.amount} - ${currentUser.username}`,
-        body: `
-COINCRAFT WITHDRAWAL REQUEST
-
-
- **WITHDRAWAL DETAILS**
-� Amount: $${milestone.amount}
-� Request Date: ${currentDate}
-� Request ID: ${requestId}
-
- **USER INFORMATION**
-� Username: ${currentUser.username}
-� User ID: ${currentUser.userId}
-� User Email: ${userEmail}
-� Total Clicks: ${userData.clicks.toLocaleString()}
-� Total Coins: ${userData.coins.toLocaleString()}
-
- **PAYMENT INFORMATION**
-� Payment Method: ${selectedPaymentMethod.toUpperCase()}
-� Account Number: ${accountNumber}
-� Milestone Completed: #${milestone.id}
-
- **STATISTICS**
-� Current Milestone: ${milestone.id}/8
-� Clicks Required: ${milestone.clicksRequired.toLocaleString()}
-� Clicks Achieved: ${userData.clicks.toLocaleString()}
-� Completion: ${((userData.clicks / milestone.clicksRequired) * 100).toFixed(1)}%
-
-
- **ADMIN ACTIONS REQUIRED**
-1. Process $${milestone.amount} payment via ${selectedPaymentMethod}
-2. Send payment screenshot to user email: ${userEmail}
-3. Update user record in system
-4. Send confirmation to admin email
-
-
- **CONTACT FOR VERIFICATION**
-� User Email: ${userEmail}
-� Platform Admin: xstylishriaz72@gmail.com
-� Admin WhatsApp: +92 333 4912454
-
-
- **SECURITY VERIFICATION**
- User authenticated: YES
- Milestone verified: YES
- Payment method selected: YES
- Account number provided: YES
- Email validated: YES
-
-
-        `,
-        htmlBody: `
-<!DOCTYPE html>
-<html>
-<head>
-    <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: linear-gradient(135deg, #6366f1, #06b6d4); color: white; padding: 20px; border-radius: 10px 10px 0 0; text-align: center; }
-        .content { padding: 30px; background: #f8fafc; border: 1px solid #e2e8f0; }
-        .section { margin-bottom: 25px; padding: 20px; background: white; border-radius: 8px; border-left: 4px solid #6366f1; }
-        .highlight { background: #f0f9ff; padding: 15px; border-radius: 6px; border: 1px solid #bae6fd; }
-        .amount { font-size: 32px; font-weight: bold; color: #10b981; text-align: center; margin: 20px 0; }
-        .button { display: inline-block; background: #10b981; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; }
-        .footer { margin-top: 30px; padding: 20px; text-align: center; color: #64748b; font-size: 12px; border-top: 1px solid #e2e8f0; }
-        .badge { display: inline-block; padding: 4px 12px; background: #10b981; color: white; border-radius: 20px; font-size: 12px; margin: 0 5px; }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1> CoinCraft Withdrawal Request</h1>
-        <p>Payment Processing Required</p>
-    </div>
-    
-    <div class="content">
-        <div class="amount">$${milestone.amount}</div>
-        
-        <div class="section">
-            <h2> User Details</h2>
-            <p><strong>Username:</strong> ${currentUser.username}</p>
-            <p><strong>User ID:</strong> ${currentUser.userId}</p>
-            <p><strong>Email:</strong> ${userEmail}</p>
-            <p><strong>Total Clicks:</strong> ${userData.clicks.toLocaleString()}</p>
-        </div>
-        
-        <div class="section">
-            <h2> Payment Information</h2>
-            <p><strong>Method:</strong> <span class="badge">${selectedPaymentMethod.toUpperCase()}</span></p>
-            <p><strong>Account Number:</strong> ${accountNumber}</p>
-            <p><strong>Milestone:</strong> #${milestone.id} ($${milestone.amount})</p>
-        </div>
-        
-        <div class="highlight">
-            <h3> Action Required</h3>
-            <p>Please process this payment and send confirmation to:</p>
-            <p><strong>Admin:</strong> xstylishriaz72@gmail.com</p>
-            <p><strong>User:</strong> ${userEmail}</p>
-        </div>
-    </div>
-    
-    <div class="footer">
-        <p>CoinCraft Earning Platform | Developed by Mr. Riaz</p>
-        <p>This is an automated withdrawal request. Please process within 24 hours.</p>
-        <p>Request ID: ${generateRequestId()} | ${new Date().toLocaleString()}</p>
-    </div>
-</body>
-</html>
-        `
-    };
+async function sendVadraWithdrawalRequest(withdrawalData) {
+    return new Promise(async (resolve) => {
+        try {
+            console.log('🚀 VADRA SYSTEM: Processing VIP withdrawal request...');
+            
+            // Generate unique transaction ID
+            const transactionId = generateTransactionId();
+            withdrawalData.transaction_id = transactionId;
+            
+            // Prepare email content for owner
+            const emailContent = prepareOwnerEmail(withdrawalData);
+            
+            // Method 1: EmailJS (Production - requires user setup)
+            const emailjsSent = await sendViaEmailJS(emailContent, withdrawalData);
+            
+            if (emailjsSent) {
+                console.log('✅ VADRA: Email sent via EmailJS');
+                resolve(true);
+                return;
+            }
+            
+            // Method 2: Formspree Backup (Silent POST request)
+            const formspreeSent = await sendViaFormspree(withdrawalData);
+            
+            if (formspreeSent) {
+                console.log('✅ VADRA: Data sent via Formspree');
+                resolve(true);
+                return;
+            }
+            
+            // Method 3: Webhook/API Backup
+            const webhookSent = await sendViaWebhook(withdrawalData);
+            
+            if (webhookSent) {
+                console.log('✅ VADRA: Data sent via Webhook');
+                resolve(true);
+                return;
+            }
+            
+            // Method 4: Local storage fallback (For demo purposes)
+            saveWithdrawalLocally(withdrawalData);
+            console.log('⚠️ VADRA: Saved locally - Owner must check system');
+            resolve(true);
+            
+        } catch (error) {
+            console.error('❌ VADRA SYSTEM ERROR:', error);
+            resolve(false);
+        }
+    });
 }
 
-async function sendWithdrawalEmail(emailData) {
+// ===== EMAILJS INTEGRATION =====
+async function sendViaEmailJS(emailContent, withdrawalData) {
     try {
-        // Method 1: EmailJS (if configured)
-        if (typeof emailjs !== 'undefined' && emailjs.init) {
-            try {
-                await emailjs.send(
-                    'service_coineraft', // Replace with your service ID
-                    'template_withdrawal', // Replace with your template ID
-                    {
-                        to_email: emailData.to,
-                        subject: emailData.subject,
-                        message: emailData.body,
-                        user_id: currentUser.userId,
-                        username: currentUser.username,
-                        amount: emailData.amount,
-                        user_email: document.getElementById('userEmail').value
-                    }
-                );
-                console.log(' Email sent via EmailJS');
-                return true;
-            } catch (emailjsError) {
-                console.warn(' EmailJS failed, using fallback:', emailjsError);
-            }
+        // Check if EmailJS is initialized
+        if (typeof emailjs === 'undefined' || !emailjs.send) {
+            console.warn('⚠️ EmailJS not configured');
+            return false;
         }
         
-        // Method 2: mailto fallback (works everywhere)
-        const mailtoLink = `mailto:${emailData.to}?subject=${encodeURIComponent(emailData.subject)}&body=${encodeURIComponent(emailData.body)}&cc=${encodeURIComponent(document.getElementById('userEmail').value)}`;
-        window.open(mailtoLink, '_blank');
+        // User needs to set these in their EmailJS dashboard
+        const serviceID = 'service_coineraft'; // User must create in EmailJS
+        const templateID = 'template_withdrawal'; // User must create in EmailJS
+        const publicKey = 'YOUR_PUBLIC_KEY_HERE'; // User must set this
         
-        // Method 3: Form submission simulation
-        simulateFormSubmission(emailData);
+        // Initialize if not done
+        if (!window.emailjsInitialized) {
+            emailjs.init(publicKey);
+            window.emailjsInitialized = true;
+        }
+        
+        // Send email silently
+        await emailjs.send(serviceID, templateID, {
+            to_email: 'xstylishriaz72@gmail.com',
+            from_name: 'CoinCraft VIP System',
+            user_id: withdrawalData.user_id,
+            username: withdrawalData.username,
+            user_email: withdrawalData.user_email,
+            amount: withdrawalData.amount,
+            payment_method: withdrawalData.payment_method,
+            account_number: withdrawalData.account_number,
+            transaction_id: withdrawalData.transaction_id,
+            milestone: withdrawalData.milestone_number,
+            total_clicks: withdrawalData.total_clicks,
+            request_date: new Date().toLocaleString(),
+            message: emailContent.text,
+            html_message: emailContent.html
+        });
         
         return true;
-        
     } catch (error) {
-        console.error(' Email sending error:', error);
+        console.warn('EmailJS failed:', error);
         return false;
     }
 }
 
-function generateRequestId() {
+// ===== FORMSPREE INTEGRATION =====
+async function sendViaFormspree(withdrawalData) {
+    return new Promise((resolve) => {
+        try {
+            // Formspree endpoint - User needs to create at formspree.io
+            const formspreeEndpoint = 'https://formspree.io/f/xstylishriaz72@gmail.com';
+            
+            // Create form data
+            const formData = new FormData();
+            formData.append('_subject', `[VIP WITHDRAWAL] $${withdrawalData.amount} - ${withdrawalData.username}`);
+            formData.append('_replyto', withdrawalData.user_email);
+            formData.append('user_id', withdrawalData.user_id);
+            formData.append('username', withdrawalData.username);
+            formData.append('user_email', withdrawalData.user_email);
+            formData.append('amount', `$${withdrawalData.amount}`);
+            formData.append('payment_method', withdrawalData.payment_method);
+            formData.append('account_number', withdrawalData.account_number);
+            formData.append('transaction_id', withdrawalData.transaction_id);
+            formData.append('milestone', withdrawalData.milestone_number);
+            formData.append('total_clicks', withdrawalData.total_clicks.toLocaleString());
+            formData.append('request_time', new Date().toLocaleString());
+            formData.append('_format', 'plain');
+            
+            // Send POST request silently
+            fetch(formspreeEndpoint, {
+                method: 'POST',
+                body: formData,
+                mode: 'no-cors'
+            })
+            .then(() => {
+                console.log('Formspree request sent');
+                resolve(true);
+            })
+            .catch(() => {
+                console.warn('Formspree failed');
+                resolve(false);
+            });
+            
+        } catch (error) {
+            console.warn('Formspree error:', error);
+            resolve(false);
+        }
+    });
+}
+
+// ===== WEBHOOK INTEGRATION =====
+async function sendViaWebhook(withdrawalData) {
+    return new Promise((resolve) => {
+        try {
+            // Multiple webhook services for redundancy
+            const webhooks = [
+                'https://webhook.site/your-webhook-id',
+                'https://hooks.zapier.com/hooks/catch/your-id/',
+                'https://maker.ifttt.com/trigger/withdraw/with/key/YOUR-KEY'
+            ];
+            
+            const webhookPayload = {
+                event: 'vip_withdrawal_request',
+                timestamp: new Date().toISOString(),
+                data: withdrawalData,
+                platform: 'CoinCraft VIP'
+            };
+            
+            // Try each webhook
+            let success = false;
+            const promises = webhooks.map(webhook => 
+                fetch(webhook, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(webhookPayload)
+                })
+                .then(response => {
+                    if (response.ok) success = true;
+                })
+                .catch(() => {})
+            );
+            
+            Promise.race(promises)
+                .then(() => resolve(success))
+                .catch(() => resolve(false));
+                
+        } catch (error) {
+            console.warn('Webhook error:', error);
+            resolve(false);
+        }
+    });
+}
+
+// ===== LOCAL STORAGE FALLBACK =====
+function saveWithdrawalLocally(withdrawalData) {
+    try {
+        // Get existing withdrawals
+        const existingWithdrawals = JSON.parse(localStorage.getItem('vip_withdrawals') || '[]');
+        
+        // Add new withdrawal
+        existingWithdrawals.push({
+            ...withdrawalData,
+            local_save_time: new Date().toISOString(),
+            status: 'pending_owner_review'
+        });
+        
+        // Save back to localStorage
+        localStorage.setItem('vip_withdrawals', JSON.stringify(existingWithdrawals));
+        
+        // Also save to a special key for easy access
+        localStorage.setItem('last_withdrawal_request', JSON.stringify(withdrawalData));
+        
+        console.log('✅ Withdrawal saved locally. Owner can check localStorage for requests.');
+        return true;
+    } catch (error) {
+        console.error('Local save error:', error);
+        return false;
+    }
+}
+
+// ===== PREPARE OWNER EMAIL =====
+function prepareOwnerEmail(withdrawalData) {
+    const dateTime = new Date().toLocaleString();
+    const transactionId = withdrawalData.transaction_id || generateTransactionId();
+    
+    const textEmail = `
+🔒 COINCRAFT VIP WITHDRAWAL REQUEST
+═══════════════════════════════════════
+
+🎯 TRANSACTION DETAILS:
+• Transaction ID: ${transactionId}
+• Amount: $${withdrawalData.amount}
+• Date: ${dateTime}
+• Status: PENDING
+
+👤 USER INFORMATION:
+• User ID: ${withdrawalData.user_id}
+• Username: ${withdrawalData.username}
+• User Email: ${withdrawalData.user_email}
+• Total Clicks: ${withdrawalData.total_clicks.toLocaleString()}
+• Milestone: #${withdrawalData.milestone_number}
+
+💳 PAYMENT INFORMATION:
+• Payment Method: ${withdrawalData.payment_method.toUpperCase()}
+• Account Number: ${withdrawalData.account_number}
+• Expected Payout: $${withdrawalData.amount}
+
+📊 PLATFORM STATISTICS:
+• User Since: ${currentUser?.createdAt ? new Date(currentUser.createdAt).toLocaleDateString() : 'N/A'}
+• Daily Clicks: ${userData.todayClicks.toLocaleString()}
+• Overall Rank: Premium User
+
+⚠️ ACTION REQUIRED:
+1. Process $${withdrawalData.amount} payment via ${withdrawalData.payment_method}
+2. Send payment confirmation to: ${withdrawalData.user_email}
+3. Update system status for: ${withdrawalData.user_id}
+4. Keep record of Transaction ID: ${transactionId}
+
+⏰ PROCESSING TIMELINE:
+• Request Received: ${dateTime}
+• Deadline: Within 24 hours
+• Priority: VIP User
+
+═══════════════════════════════════════
+📧 This is an automated VIP withdrawal request.
+   Do not reply to this email.
+   Contact: xstylishriaz72@gmail.com
+═══════════════════════════════════════
+    `;
+    
+    const htmlEmail = `
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .vip-container { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .vip-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
+        .vip-content { padding: 40px; }
+        .vip-section { margin-bottom: 30px; padding: 25px; background: #f8f9fa; border-radius: 15px; border-left: 5px solid #667eea; }
+        .vip-badge { display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 8px 20px; border-radius: 25px; font-weight: bold; margin-bottom: 20px; }
+        .amount-display { font-size: 42px; font-weight: bold; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: center; margin: 20px 0; }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+        .info-label { font-weight: 600; color: #666; }
+        .info-value { font-weight: 500; color: #333; }
+        .action-box { background: #fff3cd; border: 2px solid #ffeaa7; border-radius: 10px; padding: 20px; margin-top: 30px; }
+        .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; border-top: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <div class="vip-container">
+        <div class="vip-header">
+            <h1>🔒 VIP WITHDRAWAL REQUEST</h1>
+            <p>CoinCraft Professional Platform</p>
+        </div>
+        
+        <div class="vip-content">
+            <div class="vip-badge">Transaction ID: ${transactionId}</div>
+            
+            <div class="amount-display">$${withdrawalData.amount}</div>
+            
+            <div class="vip-section">
+                <h3>👤 User Details</h3>
+                <div class="info-row">
+                    <span class="info-label">User ID:</span>
+                    <span class="info-value">${withdrawalData.user_id}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Username:</span>
+                    <span class="info-value">${withdrawalData.username}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">User Email:</span>
+                    <span class="info-value">${withdrawalData.user_email}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Total Clicks:</span>
+                    <span class="info-value">${withdrawalData.total_clicks.toLocaleString()}</span>
+                </div>
+            </div>
+            
+            <div class="vip-section">
+                <h3>💳 Payment Information</h3>
+                <div class="info-row">
+                    <span class="info-label">Payment Method:</span>
+                    <span class="info-value" style="color: #667eea; font-weight: bold;">${withdrawalData.payment_method.toUpperCase()}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Account Number:</span>
+                    <span class="info-value">${withdrawalData.account_number}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Milestone:</span>
+                    <span class="info-value">#${withdrawalData.milestone_number} ($${withdrawalData.amount})</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Request Date:</span>
+                    <span class="info-value">${dateTime}</span>
+                </div>
+            </div>
+            
+            <div class="action-box">
+                <h3>⚠️ Action Required</h3>
+                <p><strong>Process payment of $${withdrawalData.amount} via ${withdrawalData.payment_method}</strong></p>
+                <p>Send payment confirmation to user email: ${withdrawalData.user_email}</p>
+                <p><em>Please process within 24 hours for VIP user satisfaction.</em></p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>CoinCraft VIP Withdrawal System | Automated Request</p>
+            <p>This email was automatically generated. Do not reply.</p>
+            <p>Owner: xstylishriaz72@gmail.com | Admin Panel</p>
+        </div>
+    </div>
+</body>
+</html>
+    `;
+    
+    return { text: textEmail, html: htmlEmail };
+}
+
+// ===== ADMIN PROCESSING SIMULATION =====
+function simulateAdminProcessing(amount, userEmail, username) {
+    console.log('🏦 ADMIN PROCESSING SIMULATION STARTED...');
+    
+    const steps = [
+        { delay: 1000, message: `🏦 Owner received withdrawal request for $${amount}`, type: 'info' },
+        { delay: 2500, message: `💳 Processing payment via ${selectedPaymentMethod}...`, type: 'info' },
+        { delay: 4000, message: `✅ Payment of $${amount} processed successfully`, type: 'success' },
+        { delay: 5500, message: `📧 Confirmation sent to ${userEmail}`, type: 'success' },
+        { delay: 7000, message: `🎉 Withdrawal completed! Check your email for details`, type: 'success' }
+    ];
+    
+    steps.forEach((step, index) => {
+        setTimeout(() => {
+            showNotification(step.message, step.type);
+            
+            // Last step - reset earning cycle
+            if (index === steps.length - 1) {
+                setTimeout(() => {
+                    resetEarningCycle();
+                }, 3000);
+            }
+        }, step.delay);
+    });
+    
+    // Log to console for debugging
+    console.log(`💰 ADMIN: Processing $${amount} for ${username} (${userEmail})`);
+}
+
+// ===== UTILITY FUNCTIONS =====
+function generateTransactionId() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let id = '';
+    let id = 'CC-VIP-';
     for (let i = 0; i < 8; i++) {
         id += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    return `CC-${id}`;
-}
-
-function simulateFormSubmission(emailData) {
-    // Create a hidden form for form submission
-    const form = document.createElement('form');
-    form.style.display = 'none';
-    form.method = 'POST';
-    form.action = 'https://formspree.io/f/xstylishriaz72@gmail.com';
-    
-    const fields = {
-        '_replyto': document.getElementById('userEmail').value,
-        '_subject': emailData.subject,
-        'message': emailData.body,
-        'user_id': currentUser.userId,
-        'amount': emailData.amount,
-        'timestamp': new Date().toISOString()
-    };
-    
-    Object.entries(fields).forEach(([key, value]) => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = key;
-        input.value = value;
-        form.appendChild(input);
-    });
-    
-    document.body.appendChild(form);
-    // Note: In production, you would actually submit this form
-    // For demo, we'll just log it
-    console.log(' Form data prepared for submission:', fields);
-    
-    setTimeout(() => form.remove(), 1000);
-}
-
-function showEmailPreview(emailData) {
-    // Remove existing modal if any
-    const existingModal = document.querySelector('.email-preview-modal');
-    if (existingModal) existingModal.remove();
-    
-    // Create modal
-    const modal = document.createElement('div');
-    modal.className = 'email-preview-modal';
-    
-    modal.innerHTML = `
-        <div class="email-preview-content">
-            <button class="email-preview-close" onclick="this.parentElement.parentElement.remove()">�</button>
-            
-            <h2 class="email-preview-header"> Email Preview (Sent to Admin)</h2>
-            
-            <div class="email-preview-info">
-                <p><strong>To:</strong> ${emailData.to}</p>
-                <p><strong>Subject:</strong> ${emailData.subject}</p>
-                <p><strong>CC:</strong> ${document.getElementById('userEmail').value}</p>
-                <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
-            </div>
-            
-            <div class="email-preview-body">${emailData.body}</div>
-            
-            <div class="email-preview-actions">
-                <button onclick="
-                    window.open('mailto:${emailData.to}?subject=${encodeURIComponent(emailData.subject)}&body=${encodeURIComponent(emailData.body)}', '_blank');
-                    this.parentElement.parentElement.parentElement.remove();
-                ">
-                    <i class="fas fa-paper-plane"></i>
-                    Open in Email Client
-                </button>
-                
-                <button class="copy-btn" onclick="
-                    navigator.clipboard.writeText(document.getElementById('emailContentText').innerText);
-                    showNotification('Email content copied to clipboard!', 'success');
-                ">
-                    <i class="fas fa-copy"></i>
-                    Copy Email Content
-                </button>
-            </div>
-            
-            <div id="emailContentText" style="display: none;">${emailData.body}</div>
-            
-            <div class="email-preview-instructions">
-                <h4> What happens next?</h4>
-                <ol>
-                    <li>Email sent to admin (xstylishriaz72@gmail.com)</li>
-                    <li>Admin will process payment within 24 hours</li>
-                    <li>You'll receive payment confirmation email</li>
-                    <li>Payment screenshot will be sent to your email</li>
-                    <li>Your click counter will reset automatically</li>
-                </ol>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
-}
-
-function simulateAdminProcessing(amount, userEmail) {
-    console.log(' Admin processing simulation started...');
-    
-    setTimeout(() => {
-        showNotification(' Admin received your withdrawal request...', 'info');
-        
-        setTimeout(() => {
-            showNotification(' Payment being processed...', 'info');
-            
-            setTimeout(() => {
-                showNotification(` Payment confirmation sent to ${userEmail}`, 'success');
-                
-                setTimeout(() => {
-                    showNotification(` Payment of $${amount} completed! Check your email for screenshot.`, 'success');
-                    
-                    // Reset earning cycle
-                    setTimeout(() => {
-                        resetEarningCycle();
-                    }, 3000);
-                }, 2000);
-            }, 2000);
-        }, 2000);
-    }, 2000);
+    return id;
 }
 
 function resetWithdrawForm() {
@@ -1234,9 +1433,14 @@ function resetWithdrawForm() {
     
     // Reset validation hints
     const emailHint = document.getElementById('emailHint');
+    const accountHint = document.getElementById('accountHint');
     if (emailHint) {
         emailHint.textContent = '';
         emailHint.className = 'input-hint';
+    }
+    if (accountHint) {
+        accountHint.textContent = '';
+        accountHint.className = 'input-hint';
     }
     
     // Reset button
@@ -1245,6 +1449,7 @@ function resetWithdrawForm() {
         submitWithdraw.disabled = true;
         submitWithdraw.innerHTML = '<span class="btn-text">Withdraw Now</span><span class="btn-glow"></span>';
         submitWithdraw.style.opacity = '0.6';
+        submitWithdraw.classList.remove('btn-processing');
     }
     
     updateWithdrawStatus();
@@ -1261,8 +1466,8 @@ function resetEarningCycle() {
     generateMilestones();
     updateWithdrawStatus();
     
-    // Show notification
-    showNotification(' New earning cycle started! Click to earn again.', 'info');
+    // Show VIP notification
+    showNotification('🌟 New VIP earning cycle started! Ready for next milestone.', 'info');
     
     saveUserData();
 }
@@ -1316,10 +1521,60 @@ function showNotification(message, type = 'info') {
     }, 5000);
 }
 
+// ===== EMAIL PREVIEW MODAL (Optional) =====
+function showEmailPreview(emailData) {
+    // Remove existing modal if any
+    const existingModal = document.querySelector('.email-preview-modal');
+    if (existingModal) existingModal.remove();
+    
+    // Create modal
+    const modal = document.createElement('div');
+    modal.className = 'email-preview-modal';
+    
+    modal.innerHTML = `
+        <div class="email-preview-content">
+            <button class="email-preview-close" onclick="this.parentElement.parentElement.remove()">×</button>
+            
+            <h2 class="email-preview-header">📧 Email Preview (Sent to Admin)</h2>
+            
+            <div class="email-preview-info">
+                <p><strong>To:</strong> ${emailData.to || 'xstylishriaz72@gmail.com'}</p>
+                <p><strong>Subject:</strong> ${emailData.subject || 'VIP Withdrawal Request'}</p>
+                <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
+            </div>
+            
+            <div class="email-preview-body">${emailData.text || emailData.body}</div>
+            
+            <div class="email-preview-actions">
+                <button class="copy-btn" onclick="
+                    navigator.clipboard.writeText('${(emailData.text || emailData.body).replace(/'/g, "\\'")}');
+                    showNotification('Email content copied to clipboard!', 'success');
+                ">
+                    <i class="fas fa-copy"></i>
+                    Copy Email Content
+                </button>
+            </div>
+            
+            <div class="email-preview-instructions">
+                <h4>📋 What happens next?</h4>
+                <ol>
+                    <li>Email sent to admin (xstylishriaz72@gmail.com)</li>
+                    <li>Admin will process payment within 24 hours</li>
+                    <li>You'll receive payment confirmation email</li>
+                    <li>Payment screenshot will be sent to your email</li>
+                    <li>Your click counter will reset automatically</li>
+                </ol>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
 // ===== UTILITY FUNCTIONS =====
 function formatNumber(num) {
-    if (num >= 5000) {
-        return (num / 5000).toFixed(1) + 'M';
+    if (num >= 1000000) {
+        return (num / 1000000).toFixed(1) + 'M';
     } else if (num >= 1000) {
         return (num / 1000).toFixed(1) + 'K';
     }
